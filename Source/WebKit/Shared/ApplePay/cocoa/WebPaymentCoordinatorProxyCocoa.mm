@@ -55,6 +55,7 @@
 // FIXME: We don't support any platforms without -setThumbnailURLs:, so this can be removed.
 @interface PKPaymentRequest ()
 @property (nonatomic, strong) NSURL *thumbnailURL;
+@property (nonatomic, copy) NSString *webMerchantIdentifier;
 @end
 
 namespace WebKit {
@@ -351,6 +352,9 @@ RetainPtr<PKPaymentRequest> WebPaymentCoordinatorProxy::platformPaymentRequest(c
     if (auto& multiTokenContexts = paymentRequest.multiTokenContexts())
         [result setMultiTokenContexts:platformPaymentTokenContexts(*multiTokenContexts).get()];
 #endif
+
+    if ([result respondsToSelector:@selector(setWebMerchantIdentifier:)])
+        [result setWebMerchantIdentifier:m_merchantIdentifier];
 
     return result;
 }

@@ -220,6 +220,8 @@ private:
     std::unique_ptr<PaymentAuthorizationPresenter> m_authorizationPresenter;
     Ref<WorkQueue> m_canMakePaymentsQueue;
 
+    String m_merchantIdentifier;
+
 #if PLATFORM(MAC)
     uint64_t m_showPaymentUIRequestSeed { 0 };
     RetainPtr<NSWindow> m_sheetWindow;

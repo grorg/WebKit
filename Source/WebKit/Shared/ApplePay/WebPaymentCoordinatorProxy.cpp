@@ -68,6 +68,7 @@ void WebPaymentCoordinatorProxy::canMakePaymentsWithActiveCard(const String& mer
 {
     MESSAGE_CHECK(!merchantIdentifier.isNull());
     MESSAGE_CHECK(!domainName.isNull());
+    m_merchantIdentifier = merchantIdentifier;
     platformCanMakePaymentsWithActiveCard(merchantIdentifier, domainName, WTFMove(completionHandler));
 }
 
