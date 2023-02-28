@@ -25,29 +25,39 @@
 
 #pragma once
 
-#include "ModelPlayer.h"
-#include "ModelPlayerClient.h"
-#include <wtf/Forward.h>
-#include <wtf/WeakPtr.h>
+#if ENABLE(ARKIT_INLINE_PREVIEW)
 
-namespace WebCore {
+#import "ModelIdentifier.h"
+#import "WebPage.h"
+#import "WebPageProxyMessages.h"
+#import <WebCore/ModelPlayer.h>
+#import <WebCore/ModelPlayerClient.h>
+#import <wtf/Compiler.h>
 
-class WEBCORE_EXPORT DummyModelPlayer final : public ModelPlayer {
+namespace WebKit {
+
+class HydraModelPlayer : public WebCore::ModelPlayer, public CanMakeWeakPtr<HydraModelPlayer> {
 public:
-    static Ref<DummyModelPlayer> create(ModelPlayerClient&);
-    virtual ~DummyModelPlayer();
+    static Ref<HydraModelPlayer> create(WebPage&, WebCore::ModelPlayerClient&);
+    virtual ~HydraModelPlayer();
+
+    static void setModelElementCacheDirectory(const String&);
+    static const String& modelElementCacheDirectory();
+
+protected:
+    explicit HydraModelPlayer(WebPage&, WebCore::ModelPlayerClient&);
+
+    WebPage* page() { return m_page.get(); }
+    WebCore::ModelPlayerClient* client() { return m_client.get(); }
 
 private:
-    DummyModelPlayer(ModelPlayerClient&);
+    std::optional<ModelIdentifier> modelIdentifier();
 
-    // ModelPlayer overrides.
-    void load(Model&, LayoutSize) override;
-    void sizeDidChange(LayoutSize) override;
+    // WebCore::ModelPlayer overrides.
+    void load(WebCore::Model&, WebCore::LayoutSize) override;
+    void sizeDidChange(WebCore::LayoutSize) override;
     PlatformLayer* layer() override;
     void enterFullscreen() override;
-    void handleMouseDown(const LayoutPoint&, MonotonicTime) override;
-    void handleMouseMove(const LayoutPoint&, MonotonicTime) override;
-    void handleMouseUp(const LayoutPoint&, MonotonicTime) override;
     WebCore::HTMLModelElementCamera getCamera() override;
     void setCamera(WebCore::HTMLModelElementCamera) override;
     void isPlayingAnimation(CompletionHandler<void(std::optional<bool>&&)>&&) override;
@@ -57,14 +67,30 @@ private:
     void animationDuration(CompletionHandler<void(std::optional<Seconds>&&)>&&) override;
     void animationCurrentTime(CompletionHandler<void(std::optional<Seconds>&&)>&&) override;
     void setAnimationCurrentTime(Seconds, CompletionHandler<void(bool success)>&&) override;
+
+    void handleMouseDown(const WebCore::LayoutPoint&, MonotonicTime) override;
+    void handleMouseMove(const WebCore::LayoutPoint&, MonotonicTime) override;
+    void handleMouseUp(const WebCore::LayoutPoint&, MonotonicTime) override;
+
     bool hasAudio() override;
     bool isMuted() override;
     void setIsMuted(bool) override;
-#if PLATFORM(COCOA)
     Vector<RetainPtr<id>> accessibilityChildren() override;
-#endif
 
-    WeakPtr<ModelPlayerClient> m_client;
+    void createFile(WebCore::Model&);
+    void clearFile();
+
+    void createOutputForModelWithURL(const URL&);
+    void didCreateOutputForModelWithURL(const URL&);
+
+    WeakPtr<WebPage> m_page;
+    WeakPtr<WebCore::ModelPlayerClient> m_client;
+    WebCore::LayoutSize m_size;
+    String m_uuid;
+    String m_filePath;
+    bool m_remoteRendererCreated;
 };
 
 }
+
+#endif

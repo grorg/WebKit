@@ -77,9 +77,9 @@ public:
 
     void enterFullscreen();
 
-    using CameraPromise = DOMPromiseDeferred<IDLDictionary<HTMLModelElementCamera>>;
-    void getCamera(CameraPromise&&);
-    void setCamera(HTMLModelElementCamera, DOMPromiseDeferred<void>&&);
+//    using CameraPromise = DOMPromiseDeferred<IDLDictionary<HTMLModelElementCamera>>;
+    HTMLModelElementCamera getCamera();
+    void setCamera(HTMLModelElementCamera);
 
     using IsPlayingAnimationPromise = DOMPromiseDeferred<IDLBoolean>;
     void isPlayingAnimation(IsPlayingAnimationPromise&&);
@@ -96,11 +96,11 @@ public:
     void animationCurrentTime(CurrentTimePromise&&);
     void setAnimationCurrentTime(double, DOMPromiseDeferred<void>&&);
 
-    using HasAudioPromise = DOMPromiseDeferred<IDLBoolean>;
-    void hasAudio(HasAudioPromise&&);
-    using IsMutedPromise = DOMPromiseDeferred<IDLBoolean>;
-    void isMuted(IsMutedPromise&&);
-    void setIsMuted(bool, DOMPromiseDeferred<void>&&);
+//    using HasAudioPromise = DOMPromiseDeferred<IDLBoolean>;
+    bool hasAudio();
+//    using IsMutedPromise = DOMPromiseDeferred<IDLBoolean>;
+    bool isMuted();
+    void setIsMuted(bool);
 
     bool supportsDragging() const;
     bool isDraggableIgnoringAttributes() const final;

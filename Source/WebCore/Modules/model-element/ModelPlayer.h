@@ -53,8 +53,8 @@ public:
     virtual void handleMouseDown(const LayoutPoint&, MonotonicTime) = 0;
     virtual void handleMouseMove(const LayoutPoint&, MonotonicTime) = 0;
     virtual void handleMouseUp(const LayoutPoint&, MonotonicTime) = 0;
-    virtual void getCamera(CompletionHandler<void(std::optional<HTMLModelElementCamera>&&)>&&) = 0;
-    virtual void setCamera(HTMLModelElementCamera, CompletionHandler<void(bool success)>&&) = 0;
+    virtual HTMLModelElementCamera getCamera() = 0;
+    virtual void setCamera(HTMLModelElementCamera) = 0;
     virtual void isPlayingAnimation(CompletionHandler<void(std::optional<bool>&&)>&&) = 0;
     virtual void setAnimationIsPlaying(bool, CompletionHandler<void(bool success)>&&) = 0;
     virtual void isLoopingAnimation(CompletionHandler<void(std::optional<bool>&&)>&&) = 0;
@@ -62,9 +62,9 @@ public:
     virtual void animationDuration(CompletionHandler<void(std::optional<Seconds>&&)>&&) = 0;
     virtual void animationCurrentTime(CompletionHandler<void(std::optional<Seconds>&&)>&&) = 0;
     virtual void setAnimationCurrentTime(Seconds, CompletionHandler<void(bool success)>&&) = 0;
-    virtual void hasAudio(CompletionHandler<void(std::optional<bool>&&)>&&) = 0;
-    virtual void isMuted(CompletionHandler<void(std::optional<bool>&&)>&&) = 0;
-    virtual void setIsMuted(bool, CompletionHandler<void(bool success)>&&) = 0;
+    virtual bool hasAudio() = 0;
+    virtual bool isMuted() = 0;
+    virtual void setIsMuted(bool) = 0;
     virtual String inlinePreviewUUIDForTesting() const;
 #if PLATFORM(COCOA)
     virtual Vector<RetainPtr<id>> accessibilityChildren() = 0;

@@ -39,9 +39,14 @@
 
 OBJC_CLASS ASVInlinePreview;
 
+OBJC_CLASS HYDRenderingServiceProxy;
+
 #if ENABLE(ARKIT_INLINE_PREVIEW_IOS)
 OBJC_CLASS WKModelView;
 #endif
+
+OBJC_CLASS HYDRenderer;
+OBJC_CLASS MTKView;
 
 namespace WebKit {
 
@@ -51,9 +56,9 @@ class ModelElementController : public CanMakeWeakPtr<ModelElementController> {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     explicit ModelElementController(WebPageProxy&);
-
+    
     WebPageProxy& page() { return m_webPageProxy; }
-
+    
 #if ENABLE(ARKIT_INLINE_PREVIEW)
     void getCameraForModelElement(ModelIdentifier, CompletionHandler<void(Expected<WebCore::HTMLModelElementCamera, WebCore::ResourceError>)>&&);
     void setCameraForModelElement(ModelIdentifier, WebCore::HTMLModelElementCamera, CompletionHandler<void(bool)>&&);
@@ -82,20 +87,39 @@ public:
     void handleMouseUpForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
     void inlinePreviewUUIDs(CompletionHandler<void(Vector<String>&&)>&&);
 #endif
-
+    
+#if ENABLE(HYDRA_MODEL)
+    void hydraModelElementCreateRemotePreview(String, WebCore::FloatSize, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&&);
+    void hydraModelElementLoadRemotePreview(String, URL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&&);
+    void hydraModelElementDestroyRemotePreview(String);
+    void hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&&);
+    void hydraHandleMouseDownForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
+    void hydraHandleMouseMoveForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
+    void hydraHandleMouseUpForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
+    void hydraInlinePreviewUUIDs(CompletionHandler<void(Vector<String>&&)>&&);
+#endif
+    
 private:
 #if ENABLE(ARKIT_INLINE_PREVIEW)
-    ASVInlinePreview * previewForModelIdentifier(ModelIdentifier);
+    ASVInlinePreview *previewForModelIdentifier(ModelIdentifier);
 #endif
-
+    
 #if ENABLE(ARKIT_INLINE_PREVIEW_IOS)
-    WKModelView * modelViewForModelIdentifier(ModelIdentifier);
+    WKModelView *modelViewForModelIdentifier(ModelIdentifier);
 #endif
-
+    
     WebPageProxy& m_webPageProxy;
 #if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
     RetainPtr<ASVInlinePreview> previewForUUID(const String&);
     HashMap<String, RetainPtr<ASVInlinePreview>> m_inlinePreviews;
+#endif
+    
+#if ENABLE(HYDRA_MODEL)
+//    RetainPtr<HYDRenderer> m_hydRenderer;
+//    RetainPtr<MTKView> m_mtkView;
+    HYDRenderingServiceProxy *hydraRendererForModelIdentifier(ModelIdentifier);
+    RetainPtr<HYDRenderingServiceProxy> hydraRendererForUUID(const String&);
+    HashMap<String, RetainPtr<HYDRenderingServiceProxy>> m_hydraRenderers;
 #endif
 };
 

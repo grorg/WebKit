@@ -4265,6 +4265,8 @@
 		31607F3819627002009B87DA /* LegacySessionStateCoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LegacySessionStateCoding.h; sourceTree = "<group>"; };
 		316B8B612054B55800BD4A62 /* WKUSDPreviewView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = WKUSDPreviewView.mm; path = ios/WKUSDPreviewView.mm; sourceTree = "<group>"; };
 		316B8B622054B55800BD4A62 /* WKUSDPreviewView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WKUSDPreviewView.h; path = ios/WKUSDPreviewView.h; sourceTree = "<group>"; };
+		3170223129AE18F900B15378 /* HydraModelPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HydraModelPlayer.h; sourceTree = "<group>"; };
+		3170223229AE18F900B15378 /* HydraModelPlayer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = HydraModelPlayer.mm; sourceTree = "<group>"; };
 		3178AF9720E2A7F80074DE94 /* PDFKitSPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFKitSPI.h; sourceTree = "<group>"; };
 		317FE7C11C487A6600A0CA89 /* APIFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = APIFeature.cpp; sourceTree = "<group>"; };
 		317FE7C21C487A6600A0CA89 /* APIFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APIFeature.h; sourceTree = "<group>"; };
@@ -9639,6 +9641,14 @@
 			path = Notifications;
 			sourceTree = "<group>";
 		};
+		3153494A29CB891D003058B6 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				7A830B2D29B7F3EB00848075 /* WebPageInlines.h */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		31A2EC401489973700810D71 /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
@@ -12715,6 +12725,8 @@
 				BC2B410B2732EF7500A2D191 /* mac */,
 				7177AD5C2743D7A9002F103B /* ARKitInlinePreviewModelPlayer.h */,
 				7177AD5B2743D7A9002F103B /* ARKitInlinePreviewModelPlayer.mm */,
+				3170223129AE18F900B15378 /* HydraModelPlayer.h */,
+				3170223229AE18F900B15378 /* HydraModelPlayer.mm */,
 				BC2B411B2732F66E00A2D191 /* WebModelPlayerProvider.cpp */,
 				BC2B411A2732F66E00A2D191 /* WebModelPlayerProvider.h */,
 			);

@@ -660,6 +660,7 @@ WebProcess/MediaCache/WebMediaKeyStorageManager.cpp
 WebProcess/Model/ARKitInlinePreviewModelPlayer.mm
 WebProcess/Model/ios/ARKitInlinePreviewModelPlayerIOS.mm
 WebProcess/Model/mac/ARKitInlinePreviewModelPlayerMac.mm
+WebProcess/Model/HydraModelPlayer.mm
 
 WebProcess/Plugins/PDF/PDFPlugin.mm
 WebProcess/Plugins/PDF/PDFPluginAnnotation.mm

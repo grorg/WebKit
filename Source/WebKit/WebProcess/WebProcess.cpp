@@ -160,6 +160,10 @@
 #include "ARKitInlinePreviewModelPlayerMac.h"
 #endif
 
+#if ENABLE(HYDRA_MODEL)
+#include "HydraModelPlayer.h"
+#endif
+
 #if !OS(WINDOWS)
 #include <unistd.h>
 #endif
@@ -651,6 +655,11 @@ void WebProcess::setWebsiteDataStoreParameters(WebProcessDataStoreParameters&& p
         ARKitInlinePreviewModelPlayerMac::setModelElementCacheDirectory(parameters.modelElementCacheDirectory);
 #endif
 
+#if ENABLE(HYDRA_MODEL)
+    if (!parameters.modelElementCacheDirectory.isEmpty())
+        HydraModelPlayer::setModelElementCacheDirectory(parameters.modelElementCacheDirectory);
+#endif
+
     setTrackingPreventionEnabled(parameters.trackingPreventionEnabled);
 
 #if ENABLE(TRACKING_PREVENTION)
@@ -970,6 +979,9 @@ void WebProcess::didClose(IPC::Connection& connection)
         FileSystem::markPurgeable(m_applicationCacheStorage->cacheDirectory());
 #if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
     FileSystem::markPurgeable(ARKitInlinePreviewModelPlayerMac::modelElementCacheDirectory());
+#endif
+#if ENABLE(HYDRA_MODEL)
+    FileSystem::markPurgeable(HydraModelPlayer::modelElementCacheDirectory());
 #endif
     AuxiliaryProcess::didClose(connection);
 }

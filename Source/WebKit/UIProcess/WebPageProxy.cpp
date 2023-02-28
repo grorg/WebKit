@@ -11827,6 +11827,56 @@ void WebPageProxy::modelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>
 }
 #endif
 
+#if ENABLE(HYDRA_MODEL)
+void WebPageProxy::hydraModelElementCreateRemotePreview(const String& uuid, const FloatSize& size, CompletionHandler<void(Expected<String, ResourceError>)>&& completionHandler)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraModelElementCreateRemotePreview(uuid, size, WTFMove(completionHandler));
+}
+
+void WebPageProxy::hydraModelElementLoadRemotePreview(const String& uuid, const URL& url, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraModelElementLoadRemotePreview(uuid, url, WTFMove(completionHandler));
+}
+
+void WebPageProxy::hydraModelElementDestroyRemotePreview(const String& uuid)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraModelElementDestroyRemotePreview(uuid);
+}
+
+void WebPageProxy::hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&& completionHandler)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraModelElementSizeDidChange(uuid, size, WTFMove(completionHandler));
+}
+
+void WebPageProxy::hydraHandleMouseDownForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraHandleMouseDownForModelElement(uuid, flippedLocationInElement, timestamp);
+}
+
+void WebPageProxy::hydraHandleMouseMoveForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraHandleMouseMoveForModelElement(uuid, flippedLocationInElement, timestamp);
+}
+
+void WebPageProxy::hydraHandleMouseUpForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraHandleMouseUpForModelElement(uuid, flippedLocationInElement, timestamp);
+}
+
+void WebPageProxy::hydraModelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>&&)>&& completionHandler)
+{
+    if (m_modelElementController)
+        m_modelElementController->hydraInlinePreviewUUIDs(WTFMove(completionHandler));
+}
+#endif
+
 #if !PLATFORM(COCOA) && !ENABLE(CONTENT_FILTERING_IN_NETWORKING_PROCESS)
 Vector<SandboxExtension::Handle> WebPageProxy::createNetworkExtensionsSandboxExtensions(WebProcessProxy& process)
 {

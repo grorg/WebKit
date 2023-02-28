@@ -46,7 +46,6 @@
 #import "RemoteLayerTreeDrawingAreaProxy.h"
 #import "RemoteLayerTreeHost.h"
 #import "RemoteLayerTreeViews.h"
-#import "WKModelView.h"
 #import <pal/spi/ios/SystemPreviewSPI.h>
 #endif
 
@@ -56,6 +55,11 @@
 
 SOFT_LINK_PRIVATE_FRAMEWORK(AssetViewer);
 SOFT_LINK_CLASS(AssetViewer, ASVInlinePreview);
+
+#import <Hydra/HYDRenderer.h>
+#import <Hydra/HYDRenderingServiceProxy.h>
+#import <Hydra/HYDCamera.h>
+#import <Hydra/HYDRenderParams.h>
 
 namespace WebKit {
 
@@ -547,7 +551,339 @@ void ModelElementController::setIsMutedForModelElement(ModelIdentifier modelIden
 #endif
 }
 
-#endif // ENABLE(ARKIT_INLINE_PREVIEW)
+HYDRenderingServiceProxy *ModelElementController::hydraRendererForModelIdentifier(ModelIdentifier modelIdentifier)
+{
+    if (!m_webPageProxy.preferences().modelElementEnabled())
+        return nullptr;
+
+    return m_hydraRenderers.get(modelIdentifier.uuid).get();
+}
+
+void ModelElementController::hydraModelElementCreateRemotePreview(String uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&& completionHandler)
+{
+    if (!m_webPageProxy.preferences().modelElementEnabled()) {
+        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s }));
+        return;
+    }
+
+//    auto nsUUID = adoptNS([[NSUUID alloc] initWithUUIDString:uuid]);
+//    auto renderer = adoptNS([HYDRenderingServiceProxy init]);
+
+    LOG(ModelElement, "Created UIProcess renderer with UUID %s.", uuid.utf8().data());
+
+    completionHandler(uuid);
+
+//    auto iterator = m_hydraRenderers.find(uuid);
+//    if (iterator == m_hydraRenderers.end())
+//        m_hydraRenderers.set(uuid, renderer);
+//    else
+//        iterator->value = renderer;
+//
+//    auto handler = CompletionHandlerWithFinalizer<void(Expected<String, WebCore::ResourceError>)>(WTFMove(completionHandler), [] (Function<void(Expected<String, WebCore::ResourceError>)>& completionHandler) {
+//        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::ResourceError::Type::General }));
+//    });
+
+    RELEASE_ASSERT(isMainRunLoop());
+//    [renderer setupRemoteConnectionWithCompletionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, preview, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *contextError) mutable {
+//        if (contextError) {
+//            LOG(ModelElement, "Unable to create remote connection for uuid %s: %@.", uuid.utf8().data(), contextError.localizedDescription);
+//
+//            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { contextError }] () mutable {
+//                if (!weakThis)
+//                    return;
+//
+//                handler(makeUnexpected(error));
+//            });
+//            return;
+//        }
+//
+//        LOG(ModelElement, "Established remote connection with UUID %s.", uuid.utf8().data());
+//
+//        auto contextId = [preview contextId];
+//        callOnMainRunLoop([weakThis = WTFMove(weakThis), uuid = WTFMove(uuid), handler = WTFMove(handler), contextId] () mutable {
+//            if (!weakThis)
+//                return;
+//
+//            handler(std::make_pair(uuid, contextId));
+//        });
+//    }).get()];
+}
+
+void ModelElementController::hydraModelElementLoadRemotePreview(String uuid, URL fileURL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
+{
+    if (!m_webPageProxy.preferences().modelElementEnabled()) {
+        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s });
+        return;
+    }
+
+    auto preview = previewForUUID(uuid);
+    if (!preview)
+        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Could not find a preview for the provided UUID"_s });
+
+    auto handler = CompletionHandlerWithFinalizer<void(std::optional<WebCore::ResourceError>&&)>(WTFMove(completionHandler), [](Function<void(std::optional<WebCore::ResourceError>&&)>& completionHandler) {
+        completionHandler(WebCore::ResourceError { WebCore::ResourceError::Type::General });
+    });
+
+    RELEASE_ASSERT(isMainRunLoop());
+    [preview preparePreviewOfFileAtURL:[[NSURL alloc] initFileURLWithPath:fileURL.fileSystemPath()] completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *loadError) mutable {
+        if (loadError) {
+            LOG(ModelElement, "Unable to load file for uuid %s: %@.", uuid.utf8().data(), loadError.localizedDescription);
+
+            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { loadError }] () mutable {
+                if (!weakThis)
+                    return;
+
+                handler(error);
+            });
+            return;
+        }
+
+        LOG(ModelElement, "Loaded file with UUID %s.", uuid.utf8().data());
+
+        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler)] () mutable {
+            if (!weakThis)
+                return;
+
+            handler({ });
+        });
+    }).get()];
+}
+
+void ModelElementController::hydraModelElementDestroyRemotePreview(String uuid)
+{
+    m_hydraRenderers.remove(uuid);
+}
+
+RetainPtr<HYDRenderingServiceProxy> ModelElementController::hydraRendererForUUID(const String& uuid)
+{
+    return m_hydraRenderers.get(uuid);
+}
+
+void ModelElementController::hydraHandleMouseDownForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
+{
+    if (auto preview = previewForUUID(uuid))
+        [preview mouseDownAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
+}
+
+void ModelElementController::hydraHandleMouseMoveForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
+{
+    if (auto preview = previewForUUID(uuid))
+        [preview mouseDraggedAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
+}
+
+void ModelElementController::hydraHandleMouseUpForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
+{
+    if (auto preview = previewForUUID(uuid))
+        [preview mouseUpAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
+}
+
+void ModelElementController::hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&& completionHandler)
+{
+    auto preview = previewForUUID(uuid);
+    if (!preview) {
+        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Could not find model"_s }));
+        return;
+    }
+
+    auto handler = CompletionHandlerWithFinalizer<void(Expected<MachSendRight, WebCore::ResourceError>)>(WTFMove(completionHandler), [] (Function<void(Expected<MachSendRight, WebCore::ResourceError>)>& completionHandler) {
+        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::ResourceError::Type::General }));
+    });
+
+    [preview updateFrame:CGRectMake(0, 0, size.width(), size.height()) completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, handler = WTFMove(handler), uuid] (CAFenceHandle *fenceHandle, NSError *error) mutable {
+        if (error) {
+            LOG(ModelElement, "Unable to update frame: %@.", error.localizedDescription);
+            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { error }] () mutable {
+                if (!weakThis)
+                    return;
+                handler(makeUnexpected(error));
+            });
+            [fenceHandle invalidate];
+            return;
+        }
+
+        RetainPtr strongFenceHandle = fenceHandle;
+        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), uuid, strongFenceHandle = WTFMove(strongFenceHandle)] () mutable {
+            if (!weakThis) {
+                [strongFenceHandle invalidate];
+                return;
+            }
+
+            auto fenceSendRight = MachSendRight::adopt([strongFenceHandle copyPort]);
+            [strongFenceHandle invalidate];
+            handler(fenceSendRight);
+        });
+    }).get()];
+}
+
+void ModelElementController::hydraInlinePreviewUUIDs(CompletionHandler<void(Vector<String>&&)>&& completionHandler)
+{
+    completionHandler(WTF::map(m_hydraRenderers, [](auto& entry) {
+        return entry.key;
+    }));
+}
+
+//
+//
+//void ModelElementController::hydraModelElementCreate(String uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<std::pair<String, uint32_t>, WebCore::ResourceError>)>&& completionHandler)
+//{
+//    WTFLogAlways("dino> ModelElementController::hydraModelElementCreate %s", uuid.utf8().data());
+//    LOG(ModelElement, "**** ModelElementController::hydraModelElementCreate ****");
+//    if (!m_webPageProxy.preferences().modelElementEnabled()) {
+//        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s }));
+//        return;
+//    }
+//
+//    m_mtkView = adoptNS([[MTKView alloc] init]);
+//
+//    HYDRenderParams *renderParams = [[HYDRenderParams alloc] init];
+//    renderParams.clearColor = {0.3f, 0.3f, 0.3f, 1.0};
+//    renderParams.drawMode = (HYDDrawMode)4;
+//    renderParams.cullStyle = CullNothing;
+//
+//    m_hydRenderer = adoptNS([[HYDRenderer alloc] initWithMetalKitView:m_mtkView.get()]);
+//    [m_hydRenderer setRenderParams:renderParams];
+//
+//    completionHandler(std::make_pair(uuid, (uint32_t)0));
+//
+////    auto nsUUID = adoptNS([[NSUUID alloc] initWithUUIDString:uuid]);
+////    auto preview = adoptNS([allocASVInlinePreviewInstance() initWithFrame:CGRectMake(0, 0, size.width(), size.height()) UUID:nsUUID.get()]);
+////
+////    LOG(ModelElement, "Created remote preview with UUID %s.", uuid.utf8().data());
+////
+////    auto iterator = m_inlinePreviews.find(uuid);
+////    if (iterator == m_inlinePreviews.end())
+////        m_inlinePreviews.set(uuid, preview);
+////    else
+////        iterator->value = preview;
+////
+////    auto handler = CompletionHandlerWithFinalizer<void(Expected<std::pair<String, uint32_t>, WebCore::ResourceError>)>(WTFMove(completionHandler), [] (Function<void(Expected<std::pair<String, uint32_t>, WebCore::ResourceError>)>& completionHandler) {
+////        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::ResourceError::Type::General }));
+////    });
+////
+////    RELEASE_ASSERT(isMainRunLoop());
+////    [preview setupRemoteConnectionWithCompletionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, preview, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *contextError) mutable {
+////        if (contextError) {
+////            LOG(ModelElement, "Unable to create remote connection for uuid %s: %@.", uuid.utf8().data(), contextError.localizedDescription);
+////
+////            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { contextError }] () mutable {
+////                if (!weakThis)
+////                    return;
+////
+////                handler(makeUnexpected(error));
+////            });
+////            return;
+////        }
+////
+////        LOG(ModelElement, "Established remote connection with UUID %s.", uuid.utf8().data());
+////
+////        auto contextId = [preview contextId];
+////        callOnMainRunLoop([weakThis = WTFMove(weakThis), uuid = WTFMove(uuid), handler = WTFMove(handler), contextId] () mutable {
+////            if (!weakThis)
+////                return;
+////
+////            handler(std::make_pair(uuid, contextId));
+////        });
+////    }).get()];
+//}
+//
+//void ModelElementController::hydraModelElementLoad(String uuid, URL fileURL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
+//{
+//    WTFLogAlways("dino> ModelElementController::hydraModelElementLoad %s", uuid.utf8().data());
+//
+//    if (!m_webPageProxy.preferences().modelElementEnabled()) {
+//        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s });
+//        return;
+//    }
+//
+//    completionHandler({ });
+////    auto preview = previewForUUID(uuid);
+////    if (!preview)
+////        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Could not find a preview for the provided UUID"_s });
+////
+////    auto handler = CompletionHandlerWithFinalizer<void(std::optional<WebCore::ResourceError>&&)>(WTFMove(completionHandler), [](Function<void(std::optional<WebCore::ResourceError>&&)>& completionHandler) {
+////        completionHandler(WebCore::ResourceError { WebCore::ResourceError::Type::General });
+////    });
+////
+////    RELEASE_ASSERT(isMainRunLoop());
+////    [preview preparePreviewOfFileAtURL:[[NSURL alloc] initFileURLWithPath:fileURL.fileSystemPath()] completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *loadError) mutable {
+////        if (loadError) {
+////            LOG(ModelElement, "Unable to load file for uuid %s: %@.", uuid.utf8().data(), loadError.localizedDescription);
+////
+////            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { loadError }] () mutable {
+////                if (!weakThis)
+////                    return;
+////
+////                handler(error);
+////            });
+////            return;
+////        }
+////
+////        LOG(ModelElement, "Loaded file with UUID %s.", uuid.utf8().data());
+////
+////        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler)] () mutable {
+////            if (!weakThis)
+////                return;
+////
+////            handler({ });
+////        });
+////    }).get()];
+//}
+//
+//void ModelElementController::hydraModelElementDestroy(String uuid)
+//{
+//    WTFLogAlways("dino> ModelElementController::hydraModelElementDestroy %s", uuid.utf8().data());
+//
+//    m_hydraRenderers.remove(uuid);
+//}
+//
+//void ModelElementController::hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&& completionHandler)
+//{
+//    WTFLogAlways("dino> ModelElementController::hydraModelElementSizeDidChange %s", uuid.utf8().data());
+//    auto renderer = hydraRendererForUUID(uuid);
+//    if (!renderer) {
+//        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Could not find model"_s }));
+//        return;
+//    }
+////
+////    auto handler = CompletionHandlerWithFinalizer<void(Expected<MachSendRight, WebCore::ResourceError>)>(WTFMove(completionHandler), [] (Function<void(Expected<MachSendRight, WebCore::ResourceError>)>& completionHandler) {
+////        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::ResourceError::Type::General }));
+////    });
+////
+////    [preview updateFrame:CGRectMake(0, 0, size.width(), size.height()) completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, handler = WTFMove(handler), uuid] (CAFenceHandle *fenceHandle, NSError *error) mutable {
+////        if (error) {
+////            LOG(ModelElement, "Unable to update frame: %@.", error.localizedDescription);
+////            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { error }] () mutable {
+////                if (!weakThis)
+////                    return;
+////                handler(makeUnexpected(error));
+////            });
+////            [fenceHandle invalidate];
+////            return;
+////        }
+////
+////        RetainPtr strongFenceHandle = fenceHandle;
+////        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), uuid, strongFenceHandle = WTFMove(strongFenceHandle)] () mutable {
+////            if (!weakThis) {
+////                [strongFenceHandle invalidate];
+////                return;
+////            }
+////
+////            auto fenceSendRight = MachSendRight::adopt([strongFenceHandle copyPort]);
+////            [strongFenceHandle invalidate];
+////            handler(fenceSendRight);
+////        });
+////    }).get()];
+//}
+//
+//RetainPtr<HYDRenderingServiceProxy> ModelElementController::hydraRendererForUUID(const String& uuid)
+//{
+//    if (!m_webPageProxy.preferences().modelElementEnabled())
+//        return nullptr;
+//
+//    return m_hydraRenderers.get(uuid).get();
+//}
+
+#endif // ENABLE(ARKIT_INLINE_PREVIEW_IOS)
 
 } // namespace WebKit
 

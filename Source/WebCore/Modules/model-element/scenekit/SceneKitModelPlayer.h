@@ -62,8 +62,8 @@ private:
     void handleMouseDown(const LayoutPoint&, MonotonicTime) override;
     void handleMouseMove(const LayoutPoint&, MonotonicTime) override;
     void handleMouseUp(const LayoutPoint&, MonotonicTime) override;
-    void getCamera(CompletionHandler<void(std::optional<HTMLModelElementCamera>&&)>&&) override;
-    void setCamera(HTMLModelElementCamera, CompletionHandler<void(bool success)>&&) override;
+    HTMLModelElementCamera getCamera() override;
+    void setCamera(HTMLModelElementCamera) override;
     void isPlayingAnimation(CompletionHandler<void(std::optional<bool>&&)>&&) override;
     void setAnimationIsPlaying(bool, CompletionHandler<void(bool success)>&&) override;
     void isLoopingAnimation(CompletionHandler<void(std::optional<bool>&&)>&&) override;
@@ -71,9 +71,9 @@ private:
     void animationDuration(CompletionHandler<void(std::optional<Seconds>&&)>&&) override;
     void animationCurrentTime(CompletionHandler<void(std::optional<Seconds>&&)>&&) override;
     void setAnimationCurrentTime(Seconds, CompletionHandler<void(bool success)>&&) override;
-    void hasAudio(CompletionHandler<void(std::optional<bool>&&)>&&) override;
-    void isMuted(CompletionHandler<void(std::optional<bool>&&)>&&) override;
-    void setIsMuted(bool, CompletionHandler<void(bool success)>&&) override;
+    bool hasAudio() override;
+    bool isMuted() override;
+    void setIsMuted(bool) override;
     Vector<RetainPtr<id>> accessibilityChildren() override;
 
     // SceneKitModelLoaderClient overrides.

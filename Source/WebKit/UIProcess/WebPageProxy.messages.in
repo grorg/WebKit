@@ -599,6 +599,7 @@ messages -> WebPageProxy {
     TakeModelElementFullscreen(struct WebKit::ModelIdentifier modelIdentifier)
     ModelElementSetInteractionEnabled(struct WebKit::ModelIdentifier modelIdentifier, bool isInteractionEnabled)
 #endif
+
 #if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
     ModelElementCreateRemotePreview(String uuid, WebCore::FloatSize size) -> (Expected<std::pair<String, uint32_t>, WebCore::ResourceError> result)
     ModelElementLoadRemotePreview(String uuid, URL url) -> (std::optional<WebCore::ResourceError> error)
@@ -608,6 +609,16 @@ messages -> WebPageProxy {
     HandleMouseMoveForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)
     HandleMouseUpForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)
     ModelInlinePreviewUUIDs() -> (Vector<String> uuids)
+#endif
+#if ENABLE(HYDRA_MODEL)
+    HydraModelElementCreateRemotePreview(String uuid, WebCore::FloatSize size) -> (Expected<String, WebCore::ResourceError> result)
+    HydraModelElementLoadRemotePreview(String uuid, URL url) -> (std::optional<WebCore::ResourceError> error)
+    HydraModelElementDestroyRemotePreview(String uuid)
+    HydraModelElementSizeDidChange(String uuid, WebCore::FloatSize size) -> (Expected<MachSendRight, WebCore::ResourceError> result)
+    HydraHandleMouseDownForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)
+    HydraHandleMouseMoveForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)
+    HydraHandleMouseUpForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)
+    HydraModelInlinePreviewUUIDs() -> (Vector<String> uuids)
 #endif
 #if ENABLE(ARKIT_INLINE_PREVIEW)
     ModelElementGetCamera(struct WebKit::ModelIdentifier modelIdentifier) -> (Expected<WebCore::HTMLModelElementCamera, WebCore::ResourceError> result)

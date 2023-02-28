@@ -647,6 +647,7 @@ public:
     void modelInlinePreviewDidLoad(WebCore::PlatformLayerIdentifier);
     void modelInlinePreviewDidFailToLoad(WebCore::PlatformLayerIdentifier, const WebCore::ResourceError&);
 #endif
+
 #if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
     void modelElementCreateRemotePreview(const String&, const WebCore::FloatSize&, CompletionHandler<void(Expected<std::pair<String, uint32_t>, WebCore::ResourceError>)>&&);
     void modelElementLoadRemotePreview(const String&, const URL&, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&&);
@@ -656,6 +657,17 @@ public:
     void handleMouseMoveForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
     void handleMouseUpForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
     void modelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>&&)>&&);
+#endif
+
+#if ENABLE(HYDRA_MODEL)
+    void hydraModelElementCreateRemotePreview(const String&, const WebCore::FloatSize&, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&&);
+    void hydraModelElementLoadRemotePreview(const String&, const URL&, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&&);
+    void hydraModelElementDestroyRemotePreview(const String&);
+    void hydraModelElementSizeDidChange(const String&, WebCore::FloatSize, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&&);
+    void hydraHandleMouseDownForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
+    void hydraHandleMouseMoveForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
+    void hydraHandleMouseUpForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
+    void hydraModelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>&&)>&&);
 #endif
 
 #if ENABLE(APPLE_PAY_AMS_UI)
@@ -2933,9 +2945,9 @@ private:
     std::unique_ptr<SystemPreviewController> m_systemPreviewController;
 #endif
 
-#if ENABLE(ARKIT_INLINE_PREVIEW)
+//#if ENABLE(ARKIT_INLINE_PREVIEW)
     std::unique_ptr<ModelElementController> m_modelElementController;
-#endif
+//#endif
 
 #if ENABLE(APPLE_PAY_AMS_UI)
     RetainPtr<AMSUIEngagementTask> m_applePayAMSUISession;

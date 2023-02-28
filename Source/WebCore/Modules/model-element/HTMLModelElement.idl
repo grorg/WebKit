@@ -42,8 +42,8 @@
 
     undefined enterFullscreen();
 
-    [Conditional=ARKIT_INLINE_PREVIEW_CAMERA_TRANSFORM] Promise<HTMLModelElementCamera> getCamera();
-    [Conditional=ARKIT_INLINE_PREVIEW_CAMERA_TRANSFORM] Promise<undefined> setCamera(HTMLModelElementCamera camera);
+    [Conditional=ARKIT_INLINE_PREVIEW_CAMERA_TRANSFORM] HTMLModelElementCamera getCamera();
+    [Conditional=ARKIT_INLINE_PREVIEW_CAMERA_TRANSFORM] undefined setCamera(HTMLModelElementCamera camera);
 
     [Conditional=ARKIT_INLINE_PREVIEW_ANIMATIONS_CONTROL] Promise<boolean> isPlayingAnimation();
     [Conditional=ARKIT_INLINE_PREVIEW_ANIMATIONS_CONTROL] Promise<undefined> playAnimation();
@@ -56,7 +56,7 @@
     [Conditional=ARKIT_INLINE_PREVIEW_ANIMATIONS_CONTROL] Promise<double> animationCurrentTime();
     [Conditional=ARKIT_INLINE_PREVIEW_ANIMATIONS_CONTROL] Promise<undefined> setAnimationCurrentTime(double currentTime);
 
-    [Conditional=ARKIT_INLINE_PREVIEW_AUDIO_CONTROL] Promise<boolean> hasAudio();
-    [Conditional=ARKIT_INLINE_PREVIEW_AUDIO_CONTROL] Promise<boolean> isMuted();
-    [Conditional=ARKIT_INLINE_PREVIEW_AUDIO_CONTROL] Promise<undefined> setIsMuted(boolean isMuted);
+    [Conditional=ARKIT_INLINE_PREVIEW_AUDIO_CONTROL] boolean hasAudio();
+    [Conditional=ARKIT_INLINE_PREVIEW_AUDIO_CONTROL] boolean isMuted();
+    [Conditional=ARKIT_INLINE_PREVIEW_AUDIO_CONTROL] undefined setIsMuted(boolean isMuted);
 };

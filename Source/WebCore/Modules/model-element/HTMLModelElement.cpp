@@ -468,34 +468,33 @@ void HTMLModelElement::dragDidEnd(MouseEvent& event)
 
 // MARK: - Camera support.
 
-void HTMLModelElement::getCamera(CameraPromise&& promise)
+HTMLModelElementCamera HTMLModelElement::getCamera()
 {
-    if (!m_modelPlayer) {
-        promise.reject(Exception { AbortError });
-        return;
-    }
+    if (!m_modelPlayer)
+        return HTMLModelElementCamera { };
 
-    m_modelPlayer->getCamera([promise = WTFMove(promise)] (std::optional<HTMLModelElementCamera> camera) mutable {
-        if (!camera)
-            promise.reject();
-        else
-            promise.resolve(*camera);
-    });
+    return m_modelPlayer->getCamera();
+//    m_modelPlayer->getCamera([promise = WTFMove(promise)] (std::optional<HTMLModelElementCamera> camera) mutable {
+//        if (!camera)
+//            promise.reject();
+//        else
+//            promise.resolve(*camera);
+//    });
 }
 
-void HTMLModelElement::setCamera(HTMLModelElementCamera camera, DOMPromiseDeferred<void>&& promise)
+void HTMLModelElement::setCamera(HTMLModelElementCamera camera)
 {
-    if (!m_modelPlayer) {
-        promise.reject(Exception { AbortError });
+    if (!m_modelPlayer)
         return;
-    }
 
-    m_modelPlayer->setCamera(camera, [promise = WTFMove(promise)] (bool success) mutable {
-        if (success)
-            promise.resolve();
-        else
-            promise.reject();
-    });
+    m_modelPlayer->setCamera(camera);
+
+//    m_modelPlayer->setCamera(camera, [promise = WTFMove(promise)] (bool success) mutable {
+//        if (success)
+//            promise.resolve();
+//        else
+//            promise.reject();
+//    });
 }
 
 // MARK: - Animations support.
@@ -617,49 +616,47 @@ void HTMLModelElement::setAnimationCurrentTime(double currentTime, DOMPromiseDef
 
 // MARK: - Audio support.
 
-void HTMLModelElement::hasAudio(HasAudioPromise&& promise)
+bool HTMLModelElement::hasAudio()
 {
-    if (!m_modelPlayer) {
-        promise.reject();
-        return;
-    }
+    if (!m_modelPlayer)
+        return false;
 
-    m_modelPlayer->isPlayingAnimation([promise = WTFMove(promise)] (std::optional<bool> hasAudio) mutable {
-        if (!hasAudio)
-            promise.reject();
-        else
-            promise.resolve(*hasAudio);
-    });
+    return m_modelPlayer->hasAudio();
+//    m_modelPlayer->isPlayingAnimation([promise = WTFMove(promise)] (std::optional<bool> hasAudio) mutable {
+//        if (!hasAudio)
+//            promise.reject();
+//        else
+//            promise.resolve(*hasAudio);
+//    });
 }
 
-void HTMLModelElement::isMuted(IsMutedPromise&& promise)
+bool HTMLModelElement::isMuted()
 {
-    if (!m_modelPlayer) {
-        promise.reject();
-        return;
-    }
+    if (!m_modelPlayer)
+        return false;
 
-    m_modelPlayer->isPlayingAnimation([promise = WTFMove(promise)] (std::optional<bool> isMuted) mutable {
-        if (!isMuted)
-            promise.reject();
-        else
-            promise.resolve(*isMuted);
-    });
+    return m_modelPlayer->isMuted();
+
+//    m_modelPlayer->isPlayingAnimation([promise = WTFMove(promise)] (std::optional<bool> isMuted) mutable {
+//        if (!isMuted)
+//            promise.reject();
+//        else
+//            promise.resolve(*isMuted);
+//    });
 }
 
-void HTMLModelElement::setIsMuted(bool isMuted, DOMPromiseDeferred<void>&& promise)
+void HTMLModelElement::setIsMuted(bool isMuted)
 {
-    if (!m_modelPlayer) {
-        promise.reject();
+    if (!m_modelPlayer)
         return;
-    }
 
-    m_modelPlayer->setIsMuted(isMuted, [promise = WTFMove(promise)] (bool success) mutable {
-        if (success)
-            promise.resolve();
-        else
-            promise.reject();
-    });
+    m_modelPlayer->setIsMuted(isMuted);
+//    m_modelPlayer->setIsMuted(isMuted, [promise = WTFMove(promise)] (bool success) mutable {
+//        if (success)
+//            promise.resolve();
+//        else
+//            promise.reject();
+//    });
 }
 
 const char* HTMLModelElement::activeDOMObjectName() const

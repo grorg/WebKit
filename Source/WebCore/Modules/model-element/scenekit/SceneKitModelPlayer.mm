@@ -98,11 +98,12 @@ void SceneKitModelPlayer::handleMouseUp(const LayoutPoint&, MonotonicTime)
 {
 }
 
-void SceneKitModelPlayer::getCamera(CompletionHandler<void(std::optional<HTMLModelElementCamera>&&)>&&)
+HTMLModelElementCamera SceneKitModelPlayer::getCamera()
 {
+    return HTMLModelElementCamera { };
 }
 
-void SceneKitModelPlayer::setCamera(HTMLModelElementCamera, CompletionHandler<void(bool success)>&&)
+void SceneKitModelPlayer::setCamera(HTMLModelElementCamera)
 {
 }
 
@@ -134,15 +135,17 @@ void SceneKitModelPlayer::setAnimationCurrentTime(Seconds, CompletionHandler<voi
 {
 }
 
-void SceneKitModelPlayer::hasAudio(CompletionHandler<void(std::optional<bool>&&)>&&)
+bool SceneKitModelPlayer::hasAudio()
 {
+    return false;
 }
 
-void SceneKitModelPlayer::isMuted(CompletionHandler<void(std::optional<bool>&&)>&&)
+bool SceneKitModelPlayer::isMuted()
 {
+    return false;
 }
 
-void SceneKitModelPlayer::setIsMuted(bool, CompletionHandler<void(bool success)>&&)
+void SceneKitModelPlayer::setIsMuted(bool)
 {
 }
 

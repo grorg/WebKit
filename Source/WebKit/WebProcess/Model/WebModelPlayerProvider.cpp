@@ -33,6 +33,10 @@
 #include "ARKitInlinePreviewModelPlayerMac.h"
 #endif
 
+#if ENABLE(HYDRA_MODEL)
+#include "HydraModelPlayer.h"
+#endif
+
 #if ENABLE(ARKIT_INLINE_PREVIEW_IOS)
 #include "ARKitInlinePreviewModelPlayerIOS.h"
 #endif
@@ -40,6 +44,8 @@
 #if HAVE(SCENEKIT)
 #include <WebCore/SceneKitModelPlayer.h>
 #endif
+
+#include "HydraModelPlayer.h"
 
 namespace WebKit {
 
@@ -55,20 +61,23 @@ WebModelPlayerProvider::~WebModelPlayerProvider() = default;
 
 RefPtr<WebCore::ModelPlayer> WebModelPlayerProvider::createModelPlayer(WebCore::ModelPlayerClient& client)
 {
-#if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
-    if (m_page.useARKitForModel())
-        return ARKitInlinePreviewModelPlayerMac::create(m_page, client);
-#endif
-#if HAVE(SCENEKIT)
-    if (m_page.useSceneKitForModel())
-        return WebCore::SceneKitModelPlayer::create(client);
-#endif
-#if ENABLE(ARKIT_INLINE_PREVIEW_IOS)
-    return ARKitInlinePreviewModelPlayerIOS::create(m_page, client);
-#endif
-
-    UNUSED_PARAM(client);
-    return nullptr;
+    WTFLogAlways("dino> WebModelPlayerProvider::createModelPlayer");
+    LOG(ModelElement, "WebModelPlayerProvider::createModelPlayer --");
+    return HydraModelPlayer::create(m_page, client);
+//#if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
+//    if (m_page.useARKitForModel())
+//        return ARKitInlinePreviewModelPlayerMac::create(m_page, client);
+//#endif
+//#if HAVE(SCENEKIT)
+//    if (m_page.useSceneKitForModel())
+//        return WebCore::SceneKitModelPlayer::create(client);
+//#endif
+//#if ENABLE(ARKIT_INLINE_PREVIEW_IOS)
+//    return ARKitInlinePreviewModelPlayerIOS::create(m_page, client);
+//#endif
+//
+//    UNUSED_PARAM(client);
+//    return nullptr;
 }
 
 }

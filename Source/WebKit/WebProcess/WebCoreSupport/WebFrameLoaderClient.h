@@ -305,6 +305,9 @@ private:
 #if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
     void modelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>)>&&) const final;
 #endif
+#if ENABLE(HYDRA_MODEL)
+    void hydraModelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>)>&&) const;
+#endif
 };
 
 // As long as EmptyFrameLoaderClient exists in WebCore, this can return nullptr.

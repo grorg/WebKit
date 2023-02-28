@@ -2075,6 +2075,19 @@ void WebFrameLoaderClient::modelInlinePreviewUUIDs(CompletionHandler<void(Vector
 }
 #endif
 
+#if ENABLE(HYDRA_MODEL)
+void WebFrameLoaderClient::hydraModelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>)>&& completionHandler) const
+{
+    auto* webPage = m_frame->page();
+    if (!webPage) {
+        completionHandler({ });
+        return;
+    }
+
+    webPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelInlinePreviewUUIDs(), WTFMove(completionHandler));
+}
+#endif
+
 } // namespace WebKit
 
 #undef PREFIX_PARAMETERS
