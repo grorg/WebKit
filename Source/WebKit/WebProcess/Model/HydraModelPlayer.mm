@@ -39,7 +39,7 @@
 #import <wtf/SoftLinking.h>
 #import <wtf/UUID.h>
 
-#import <Hydra/HYDRenderingServiceProxy.h>
+#import <Hydra/Hydra.h>
 
 namespace WebKit {
 
