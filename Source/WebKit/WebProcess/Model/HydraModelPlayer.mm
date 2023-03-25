@@ -59,7 +59,7 @@ HydraModelPlayer::~HydraModelPlayer()
 {
     if (m_remoteRendererCreated) {
         if (auto* page = this->page())
-            page->send(Messages::WebPageProxy::HydraModelElementDestroyRemotePreview(m_uuid));
+            page->send(Messages::WebPageProxy::HydraModelElementDestroy(m_uuid));
     }
     clearFile();
 }
@@ -195,7 +195,7 @@ void HydraModelPlayer::createOutputForModelWithURL(const URL& url)
     };
 
     // Then, create the UIProcess preview.
-    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementCreateRemotePreview(m_uuid, m_size), WTFMove(completionHandler));
+    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementCreate(m_uuid, m_size), WTFMove(completionHandler));
 }
 
 void HydraModelPlayer::didCreateOutputForModelWithURL(const URL& url)
@@ -231,7 +231,7 @@ void HydraModelPlayer::didCreateOutputForModelWithURL(const URL& url)
     };
 
     // Now that both the WebProcess and UIProcess previews are created, load the file into the remote preview.
-    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementLoadRemotePreview(m_uuid, URL::fileURLWithFileSystemPath(m_filePath)), WTFMove(completionHandler));
+    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementLoad(m_uuid, URL::fileURLWithFileSystemPath(m_filePath)), WTFMove(completionHandler));
 }
 
 

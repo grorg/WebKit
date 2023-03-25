@@ -559,7 +559,7 @@ HYDRenderingServiceProxy *ModelElementController::hydraRendererForModelIdentifie
     return m_hydraRenderers.get(modelIdentifier.uuid).get();
 }
 
-void ModelElementController::hydraModelElementCreateRemotePreview(String uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&& completionHandler)
+void ModelElementController::hydraModelElementCreate(String uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&& completionHandler)
 {
     if (!m_webPageProxy.preferences().modelElementEnabled()) {
         completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s }));
@@ -609,47 +609,47 @@ void ModelElementController::hydraModelElementCreateRemotePreview(String uuid, W
 //    }).get()];
 }
 
-void ModelElementController::hydraModelElementLoadRemotePreview(String uuid, URL fileURL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
+void ModelElementController::hydraModelElementLoad(String uuid, URL fileURL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
 {
     if (!m_webPageProxy.preferences().modelElementEnabled()) {
-        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s });
+        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "[Hydra] Model element disabled"_s });
         return;
     }
 
-    auto preview = previewForUUID(uuid);
-    if (!preview)
-        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Could not find a preview for the provided UUID"_s });
+    auto renderer = hydraRendererForUUID(uuid);
+    if (!renderer)
+        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "[Hydra] Could not find a preview for the provided UUID"_s });
 
     auto handler = CompletionHandlerWithFinalizer<void(std::optional<WebCore::ResourceError>&&)>(WTFMove(completionHandler), [](Function<void(std::optional<WebCore::ResourceError>&&)>& completionHandler) {
         completionHandler(WebCore::ResourceError { WebCore::ResourceError::Type::General });
     });
 
     RELEASE_ASSERT(isMainRunLoop());
-    [preview preparePreviewOfFileAtURL:[[NSURL alloc] initFileURLWithPath:fileURL.fileSystemPath()] completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *loadError) mutable {
-        if (loadError) {
-            LOG(ModelElement, "Unable to load file for uuid %s: %@.", uuid.utf8().data(), loadError.localizedDescription);
-
-            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { loadError }] () mutable {
-                if (!weakThis)
-                    return;
-
-                handler(error);
-            });
-            return;
-        }
-
-        LOG(ModelElement, "Loaded file with UUID %s.", uuid.utf8().data());
-
-        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler)] () mutable {
-            if (!weakThis)
-                return;
-
-            handler({ });
-        });
-    }).get()];
+//    [preview preparePreviewOfFileAtURL:[[NSURL alloc] initFileURLWithPath:fileURL.fileSystemPath()] completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *loadError) mutable {
+//        if (loadError) {
+//            LOG(ModelElement, "[Hydra] Unable to load file for uuid %s: %@.", uuid.utf8().data(), loadError.localizedDescription);
+//
+//            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { loadError }] () mutable {
+//                if (!weakThis)
+//                    return;
+//
+//                handler(error);
+//            });
+//            return;
+//        }
+//
+//        LOG(ModelElement, "[Hydra] Loaded file with UUID %s.", uuid.utf8().data());
+//
+//        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler)] () mutable {
+//            if (!weakThis)
+//                return;
+//
+//            handler({ });
+//        });
+//    }).get()];
 }
 
-void ModelElementController::hydraModelElementDestroyRemotePreview(String uuid)
+void ModelElementController::hydraModelElementDestroy(String uuid)
 {
     m_hydraRenderers.remove(uuid);
 }
@@ -661,27 +661,37 @@ RetainPtr<HYDRenderingServiceProxy> ModelElementController::hydraRendererForUUID
 
 void ModelElementController::hydraHandleMouseDownForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
 {
-    if (auto preview = previewForUUID(uuid))
-        [preview mouseDownAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
+    UNUSED_PARAM(uuid);
+    UNUSED_PARAM(flippedLocationInElement);
+    UNUSED_PARAM(timestamp);
+
+//    if (auto preview = previewForUUID(uuid))
+//        [preview mouseDownAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
 }
 
 void ModelElementController::hydraHandleMouseMoveForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
 {
-    if (auto preview = previewForUUID(uuid))
-        [preview mouseDraggedAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
+    UNUSED_PARAM(uuid);
+    UNUSED_PARAM(flippedLocationInElement);
+    UNUSED_PARAM(timestamp);
+//    if (auto preview = previewForUUID(uuid))
+//        [preview mouseDraggedAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
 }
 
 void ModelElementController::hydraHandleMouseUpForModelElement(const String& uuid, const WebCore::LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
 {
-    if (auto preview = previewForUUID(uuid))
-        [preview mouseUpAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
+    UNUSED_PARAM(uuid);
+    UNUSED_PARAM(flippedLocationInElement);
+    UNUSED_PARAM(timestamp);
+//    if (auto preview = previewForUUID(uuid))
+//        [preview mouseUpAtLocation:CGPointMake(flippedLocationInElement.x().toFloat(), flippedLocationInElement.y().toFloat()) timestamp:timestamp.secondsSinceEpoch().value()];
 }
 
 void ModelElementController::hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&& completionHandler)
 {
     auto preview = previewForUUID(uuid);
     if (!preview) {
-        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Could not find model"_s }));
+        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "[Hydra] Could not find model"_s }));
         return;
     }
 
@@ -691,7 +701,7 @@ void ModelElementController::hydraModelElementSizeDidChange(const String& uuid, 
 
     [preview updateFrame:CGRectMake(0, 0, size.width(), size.height()) completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, handler = WTFMove(handler), uuid] (CAFenceHandle *fenceHandle, NSError *error) mutable {
         if (error) {
-            LOG(ModelElement, "Unable to update frame: %@.", error.localizedDescription);
+            LOG(ModelElement, "[Hydra] Unable to update frame: %@.", error.localizedDescription);
             callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { error }] () mutable {
                 if (!weakThis)
                     return;

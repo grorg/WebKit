@@ -11828,22 +11828,22 @@ void WebPageProxy::modelInlinePreviewUUIDs(CompletionHandler<void(Vector<String>
 #endif
 
 #if ENABLE(HYDRA_MODEL)
-void WebPageProxy::hydraModelElementCreateRemotePreview(const String& uuid, const FloatSize& size, CompletionHandler<void(Expected<String, ResourceError>)>&& completionHandler)
+void WebPageProxy::hydraModelElementCreate(const String& uuid, const FloatSize& size, CompletionHandler<void(Expected<String, ResourceError>)>&& completionHandler)
 {
     if (m_modelElementController)
-        m_modelElementController->hydraModelElementCreateRemotePreview(uuid, size, WTFMove(completionHandler));
+        m_modelElementController->hydraModelElementCreate(uuid, size, WTFMove(completionHandler));
 }
 
-void WebPageProxy::hydraModelElementLoadRemotePreview(const String& uuid, const URL& url, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
+void WebPageProxy::hydraModelElementLoad(const String& uuid, const URL& url, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
 {
     if (m_modelElementController)
-        m_modelElementController->hydraModelElementLoadRemotePreview(uuid, url, WTFMove(completionHandler));
+        m_modelElementController->hydraModelElementLoad(uuid, url, WTFMove(completionHandler));
 }
 
-void WebPageProxy::hydraModelElementDestroyRemotePreview(const String& uuid)
+void WebPageProxy::hydraModelElementDestroy(const String& uuid)
 {
     if (m_modelElementController)
-        m_modelElementController->hydraModelElementDestroyRemotePreview(uuid);
+        m_modelElementController->hydraModelElementDestroy(uuid);
 }
 
 void WebPageProxy::hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize size, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&& completionHandler)

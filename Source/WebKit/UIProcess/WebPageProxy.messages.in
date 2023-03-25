@@ -611,9 +611,9 @@ messages -> WebPageProxy {
     ModelInlinePreviewUUIDs() -> (Vector<String> uuids)
 #endif
 #if ENABLE(HYDRA_MODEL)
-    HydraModelElementCreateRemotePreview(String uuid, WebCore::FloatSize size) -> (Expected<String, WebCore::ResourceError> result)
-    HydraModelElementLoadRemotePreview(String uuid, URL url) -> (std::optional<WebCore::ResourceError> error)
-    HydraModelElementDestroyRemotePreview(String uuid)
+    HydraModelElementCreate(String uuid, WebCore::FloatSize size) -> (Expected<String, WebCore::ResourceError> result)
+    HydraModelElementLoad(String uuid, URL url) -> (std::optional<WebCore::ResourceError> error)
+    HydraModelElementDestroy(String uuid)
     HydraModelElementSizeDidChange(String uuid, WebCore::FloatSize size) -> (Expected<MachSendRight, WebCore::ResourceError> result)
     HydraHandleMouseDownForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)
     HydraHandleMouseMoveForModelElement(String uuid, WebCore::LayoutPoint flippedLocationInElement, MonotonicTime timestamp)

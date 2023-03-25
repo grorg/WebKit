@@ -42,6 +42,7 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
+         BundleIdentifier = "org.webkit.MiniBrowser"
          FilePath = "/Users/dino/Build/Debug/MiniBrowser.app">
       </PathRunnable>
    </LaunchAction>

@@ -89,9 +89,9 @@ public:
 #endif
     
 #if ENABLE(HYDRA_MODEL)
-    void hydraModelElementCreateRemotePreview(String, WebCore::FloatSize, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&&);
-    void hydraModelElementLoadRemotePreview(String, URL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&&);
-    void hydraModelElementDestroyRemotePreview(String);
+    void hydraModelElementCreate(String, WebCore::FloatSize, CompletionHandler<void(Expected<String, WebCore::ResourceError>)>&&);
+    void hydraModelElementLoad(String, URL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&&);
+    void hydraModelElementDestroy(String);
     void hydraModelElementSizeDidChange(const String& uuid, WebCore::FloatSize, CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)>&&);
     void hydraHandleMouseDownForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
     void hydraHandleMouseMoveForModelElement(const String&, const WebCore::LayoutPoint&, MonotonicTime);
