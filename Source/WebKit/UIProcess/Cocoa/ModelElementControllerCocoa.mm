@@ -565,48 +565,21 @@ void ModelElementController::hydraModelElementCreate(String uuid, WebCore::Float
         completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "Model element disabled"_s }));
         return;
     }
+    
+    auto renderer = adoptNS([[HYDRenderingServiceProxy alloc] init]);
+    
+    auto iterator = m_hydraRenderers.find(uuid);
+    if (iterator == m_hydraRenderers.end())
+        m_hydraRenderers.set(uuid, renderer);
+    else {
+        ASSERT_NOT_REACHED();
+        iterator->value = renderer;
+    }
 
-//    auto nsUUID = adoptNS([[NSUUID alloc] initWithUUIDString:uuid]);
-//    auto renderer = adoptNS([HYDRenderingServiceProxy init]);
+    LOG(ModelElement, "[Hydra] Created UIProcess renderer with UUID %s.", uuid.utf8().data());
 
-    LOG(ModelElement, "Created UIProcess renderer with UUID %s.", uuid.utf8().data());
-
+    // FIXME: Return should be optional<ResourceError>
     completionHandler(uuid);
-
-//    auto iterator = m_hydraRenderers.find(uuid);
-//    if (iterator == m_hydraRenderers.end())
-//        m_hydraRenderers.set(uuid, renderer);
-//    else
-//        iterator->value = renderer;
-//
-//    auto handler = CompletionHandlerWithFinalizer<void(Expected<String, WebCore::ResourceError>)>(WTFMove(completionHandler), [] (Function<void(Expected<String, WebCore::ResourceError>)>& completionHandler) {
-//        completionHandler(makeUnexpected(WebCore::ResourceError { WebCore::ResourceError::Type::General }));
-//    });
-
-    RELEASE_ASSERT(isMainRunLoop());
-//    [renderer setupRemoteConnectionWithCompletionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, preview, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *contextError) mutable {
-//        if (contextError) {
-//            LOG(ModelElement, "Unable to create remote connection for uuid %s: %@.", uuid.utf8().data(), contextError.localizedDescription);
-//
-//            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { contextError }] () mutable {
-//                if (!weakThis)
-//                    return;
-//
-//                handler(makeUnexpected(error));
-//            });
-//            return;
-//        }
-//
-//        LOG(ModelElement, "Established remote connection with UUID %s.", uuid.utf8().data());
-//
-//        auto contextId = [preview contextId];
-//        callOnMainRunLoop([weakThis = WTFMove(weakThis), uuid = WTFMove(uuid), handler = WTFMove(handler), contextId] () mutable {
-//            if (!weakThis)
-//                return;
-//
-//            handler(std::make_pair(uuid, contextId));
-//        });
-//    }).get()];
 }
 
 void ModelElementController::hydraModelElementLoad(String uuid, URL fileURL, CompletionHandler<void(std::optional<WebCore::ResourceError>&&)>&& completionHandler)
@@ -617,36 +590,13 @@ void ModelElementController::hydraModelElementLoad(String uuid, URL fileURL, Com
     }
 
     auto renderer = hydraRendererForUUID(uuid);
-    if (!renderer)
-        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "[Hydra] Could not find a preview for the provided UUID"_s });
+    if (!renderer) {
+        completionHandler(WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, "[Hydra] Could not find a renderer for the provided UUID"_s });
+        return;
+    }
 
-    auto handler = CompletionHandlerWithFinalizer<void(std::optional<WebCore::ResourceError>&&)>(WTFMove(completionHandler), [](Function<void(std::optional<WebCore::ResourceError>&&)>& completionHandler) {
-        completionHandler(WebCore::ResourceError { WebCore::ResourceError::Type::General });
-    });
-
-    RELEASE_ASSERT(isMainRunLoop());
-//    [preview preparePreviewOfFileAtURL:[[NSURL alloc] initFileURLWithPath:fileURL.fileSystemPath()] completionHandler:makeBlockPtr([weakThis = WeakPtr { *this }, uuid = WTFMove(uuid), handler = WTFMove(handler)] (NSError *loadError) mutable {
-//        if (loadError) {
-//            LOG(ModelElement, "[Hydra] Unable to load file for uuid %s: %@.", uuid.utf8().data(), loadError.localizedDescription);
-//
-//            callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler), error = WebCore::ResourceError { loadError }] () mutable {
-//                if (!weakThis)
-//                    return;
-//
-//                handler(error);
-//            });
-//            return;
-//        }
-//
-//        LOG(ModelElement, "[Hydra] Loaded file with UUID %s.", uuid.utf8().data());
-//
-//        callOnMainRunLoop([weakThis = WTFMove(weakThis), handler = WTFMove(handler)] () mutable {
-//            if (!weakThis)
-//                return;
-//
-//            handler({ });
-//        });
-//    }).get()];
+    LOG(ModelElement, "[Hydra] Loaded file with UUID %s.", uuid.utf8().data());
+    completionHandler({ });
 }
 
 void ModelElementController::hydraModelElementDestroy(String uuid)
