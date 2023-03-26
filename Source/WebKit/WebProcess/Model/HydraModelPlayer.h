@@ -34,6 +34,8 @@
 #import <WebCore/ModelPlayerClient.h>
 #import <wtf/Compiler.h>
 
+OBJC_CLASS CALayer;
+
 namespace WebKit {
 
 class HydraModelPlayer : public WebCore::ModelPlayer, public CanMakeWeakPtr<HydraModelPlayer> {
@@ -88,7 +90,8 @@ private:
     WebCore::LayoutSize m_size;
     String m_uuid;
     String m_filePath;
-    bool m_remoteRendererCreated;
+    RetainPtr<CALayer> m_layer;
+    bool m_rendererCreated;
 };
 
 }

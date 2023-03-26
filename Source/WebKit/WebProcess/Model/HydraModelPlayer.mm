@@ -51,13 +51,14 @@ Ref<HydraModelPlayer> HydraModelPlayer::create(WebPage& page, WebCore::ModelPlay
 HydraModelPlayer::HydraModelPlayer(WebPage& page, WebCore::ModelPlayerClient& client)
     : m_page { page }
     , m_client { client }
-    , m_remoteRendererCreated { false }
+    , m_layer { adoptNS([[CALayer alloc] init]) }
+    , m_rendererCreated { false }
 {
 }
 
 HydraModelPlayer::~HydraModelPlayer()
 {
-    if (m_remoteRendererCreated) {
+    if (m_rendererCreated) {
         if (auto* page = this->page())
             page->send(Messages::WebPageProxy::HydraModelElementDestroy(m_uuid));
     }
@@ -189,7 +190,7 @@ void HydraModelPlayer::createOutputForModelWithURL(const URL& url)
 
         LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() successfully established remote connection for UUID %s.", uuid.utf8().data());
 
-        strongSelf->m_remoteRendererCreated = true;
+        strongSelf->m_rendererCreated = true;
 
         strongSelf->didCreateOutputForModelWithURL(url);
     };
@@ -271,7 +272,7 @@ void HydraModelPlayer::sizeDidChange(WebCore::LayoutSize size)
 
 PlatformLayer* HydraModelPlayer::layer()
 {
-    return nil;
+    return m_layer.get();
 }
 
 void HydraModelPlayer::handleMouseDown(const LayoutPoint& flippedLocationInElement, MonotonicTime timestamp)
