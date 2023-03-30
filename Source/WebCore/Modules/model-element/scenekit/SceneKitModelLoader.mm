@@ -107,7 +107,8 @@ Ref<SceneKitModelLoader> loadSceneKitModel(Model& modelSource, SceneKitModelLoad
     case ModelType::USD:
         return loadSceneKitModelUsingUSDLoader(modelSource, client);
     case ModelType::Unknown:
-        break;
+        return loadSceneKitModelUsingUSDLoader(modelSource, client);
+//        break;
     }
 
     auto loader = SceneKitModelLoaderFailure::create([NSError errorWithDomain:@"SceneKitModelLoader" code:-1 userInfo:@{
