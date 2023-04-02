@@ -54,6 +54,7 @@ SceneKitModelPlayer::SceneKitModelPlayer(ModelPlayerClient& client)
 
     // FIXME: This should be done by the caller.
     m_layer.get().contentsScale = 2.0;
+    m_layer.get().backgroundColor = NSColor.redColor.CGColor;
 }
 
 SceneKitModelPlayer::~SceneKitModelPlayer()
@@ -181,6 +182,8 @@ void SceneKitModelPlayer::updateScene()
     if (m_layer.get().scene == m_model->defaultScene())
         return;
     m_layer.get().scene = m_model->defaultScene();
+    m_layer.get().autoenablesDefaultLighting = YES;
+    m_layer.get().playing = YES;
 }
 
 Vector<RetainPtr<id>> SceneKitModelPlayer::accessibilityChildren()
