@@ -35,6 +35,7 @@
 #import <wtf/Compiler.h>
 
 OBJC_CLASS CAMetalLayer;
+OBJC_CLASS HYDRenderingServiceProxy;
 
 namespace WebKit {
 
@@ -94,6 +95,9 @@ private:
     String m_filePath;
     RetainPtr<CAMetalLayer> m_layer;
     bool m_rendererCreated;
+
+    RetainPtr<HYDRenderingServiceProxy> m_hydraProxy;
+
 };
 
 }

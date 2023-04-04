@@ -39,6 +39,7 @@
 #import <wtf/SoftLinking.h>
 #import <wtf/UUID.h>
 
+#import <Metal/Metal.h>
 #import <Hydra/Hydra.h>
 
 namespace WebKit {
@@ -146,14 +147,21 @@ void HydraModelPlayer::load(WebCore::Model& modelSource, WebCore::LayoutSize siz
     }
 
     createFile(modelSource);
-//    createOutputForModelWithURL(modelSource.url());
+    createOutputForModelWithURL(modelSource.url());
     loadURL(modelSource.url());
 }
 
 void HydraModelPlayer::loadURL(const URL& url)
 {
     WTFLogAlways("dino> HydraModelPlayer::loadURL() %s.", url.string().utf8().data());
+    WTFLogAlways("dino> HydraModelPlayer::loadURL() file path.", m_filePath.utf8().data());
 
+    if (!m_hydraProxy) {
+        m_hydraProxy = adoptNS([[HYDRenderingServiceProxy alloc] init]);
+    }
+
+    BOOL success = [m_hydraProxy.get() loadStage:m_filePath];
+    WTFLogAlways("dino> loadStage gave %s", success ? "YES" : "NO");
 }
 
 void HydraModelPlayer::createOutputForModelWithURL(const URL& url)
@@ -251,31 +259,31 @@ void HydraModelPlayer::sizeDidChange(WebCore::LayoutSize size)
 
     m_size = size;
 
-    RefPtr strongPage = page();
-    if (!strongPage)
-        return;
-
-    CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)> completionHandler = [weakSelf = WeakPtr { *this }, strongPage, size] (Expected<MachSendRight, WebCore::ResourceError> result) mutable {
-        if (!result)
-            return;
-
-        RefPtr strongSelf = weakSelf.get();
-        if (!strongSelf)
-            return;
-
-        auto* drawingArea = strongPage->drawingArea();
-        if (!drawingArea)
-            return;
-
-        auto fenceSendRight = *result;
-        drawingArea->addFence(fenceSendRight);
-
-        UNUSED_PARAM(size);
-        WTFLogAlways("dino> ***** FIXME **** update local size");
-//        [strongSelf->m_hydra setFrameWithinFencedTransaction:CGRectMake(0, 0, size.width(), size.height())];
-    };
-
-    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementSizeDidChange(m_uuid, size), WTFMove(completionHandler));
+//    RefPtr strongPage = page();
+//    if (!strongPage)
+//        return;
+//
+//    CompletionHandler<void(Expected<MachSendRight, WebCore::ResourceError>)> completionHandler = [weakSelf = WeakPtr { *this }, strongPage, size] (Expected<MachSendRight, WebCore::ResourceError> result) mutable {
+//        if (!result)
+//            return;
+//
+//        RefPtr strongSelf = weakSelf.get();
+//        if (!strongSelf)
+//            return;
+//
+//        auto* drawingArea = strongPage->drawingArea();
+//        if (!drawingArea)
+//            return;
+//
+//        auto fenceSendRight = *result;
+//        drawingArea->addFence(fenceSendRight);
+//
+//        UNUSED_PARAM(size);
+//        WTFLogAlways("dino> ***** FIXME **** update local size");
+////        [strongSelf->m_hydra setFrameWithinFencedTransaction:CGRectMake(0, 0, size.width(), size.height())];
+//    };
+//
+//    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementSizeDidChange(m_uuid, size), WTFMove(completionHandler));
 }
 
 PlatformLayer* HydraModelPlayer::layer()
