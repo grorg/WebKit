@@ -205,6 +205,9 @@ static NSString *toCAFilterType(PlatformCALayer::FilterType type)
 
 PlatformCALayer::LayerType PlatformCALayerCocoa::layerTypeForPlatformLayer(PlatformLayer* layer)
 {
+    if ([layer isKindOfClass:[CAMetalLayer class]]) {
+        return LayerTypeModelLayer;
+    }
     if (PAL::isAVFoundationFrameworkAvailable() && [layer isKindOfClass:PAL::getAVPlayerLayerClass()])
         return LayerTypeAVPlayerLayer;
 
@@ -258,7 +261,7 @@ PlatformCALayerCocoa::PlatformCALayerCocoa(LayerType layerType, PlatformCALayerC
         break;
 #if ENABLE(MODEL_ELEMENT)
     case LayerTypeModelLayer:
-        layerClass = [CALayer class];
+        layerClass = [CAMetalLayer class];
         break;
 #endif
     case LayerTypeHost:

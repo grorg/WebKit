@@ -34,7 +34,7 @@
 #import <WebCore/ModelPlayerClient.h>
 #import <wtf/Compiler.h>
 
-OBJC_CLASS CALayer;
+OBJC_CLASS CAMetalLayer;
 
 namespace WebKit {
 
@@ -85,12 +85,14 @@ private:
     void createOutputForModelWithURL(const URL&);
     void didCreateOutputForModelWithURL(const URL&);
 
+    void loadURL(const URL&);
+
     WeakPtr<WebPage> m_page;
     WeakPtr<WebCore::ModelPlayerClient> m_client;
     WebCore::LayoutSize m_size;
     String m_uuid;
     String m_filePath;
-    RetainPtr<CALayer> m_layer;
+    RetainPtr<CAMetalLayer> m_layer;
     bool m_rendererCreated;
 };
 

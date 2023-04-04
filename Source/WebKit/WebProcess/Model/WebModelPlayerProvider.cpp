@@ -63,10 +63,10 @@ RefPtr<WebCore::ModelPlayer> WebModelPlayerProvider::createModelPlayer(WebCore::
 {
     WTFLogAlways("dino> WebModelPlayerProvider::createModelPlayer");
     LOG(ModelElement, "WebModelPlayerProvider::createModelPlayer --");
-#if HAVE(SCENEKIT)
-    if (m_page.useSceneKitForModel())
-        return WebCore::SceneKitModelPlayer::create(client);
-#endif
+//#if HAVE(SCENEKIT)
+//    if (m_page.useSceneKitForModel())
+//        return WebCore::SceneKitModelPlayer::create(client);
+//#endif
     return HydraModelPlayer::create(m_page, client);
 //#if ENABLE(ARKIT_INLINE_PREVIEW_MAC)
 //    if (m_page.useARKitForModel())

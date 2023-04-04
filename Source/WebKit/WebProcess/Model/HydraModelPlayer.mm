@@ -51,9 +51,10 @@ Ref<HydraModelPlayer> HydraModelPlayer::create(WebPage& page, WebCore::ModelPlay
 HydraModelPlayer::HydraModelPlayer(WebPage& page, WebCore::ModelPlayerClient& client)
     : m_page { page }
     , m_client { client }
-    , m_layer { adoptNS([[CALayer alloc] init]) }
+    , m_layer { adoptNS([[CAMetalLayer alloc] init]) }
     , m_rendererCreated { false }
 {
+    [m_layer.get() setBackgroundColor:NSColor.redColor.CGColor];
 }
 
 HydraModelPlayer::~HydraModelPlayer()
@@ -145,7 +146,14 @@ void HydraModelPlayer::load(WebCore::Model& modelSource, WebCore::LayoutSize siz
     }
 
     createFile(modelSource);
-    createOutputForModelWithURL(modelSource.url());
+//    createOutputForModelWithURL(modelSource.url());
+    loadURL(modelSource.url());
+}
+
+void HydraModelPlayer::loadURL(const URL& url)
+{
+    WTFLogAlways("dino> HydraModelPlayer::loadURL() %s.", url.string().utf8().data());
+
 }
 
 void HydraModelPlayer::createOutputForModelWithURL(const URL& url)
@@ -164,39 +172,39 @@ void HydraModelPlayer::createOutputForModelWithURL(const URL& url)
         return;
     }
 
-    CompletionHandler<void(Expected<String, WebCore::ResourceError>)> completionHandler = [weakSelf = WeakPtr { *this }, url] (Expected<String, WebCore::ResourceError> result) mutable {
-        RefPtr strongSelf = weakSelf.get();
-        if (!strongSelf)
-            return;
-
-        auto strongClient = strongSelf->client();
-        if (!strongClient)
-            return;
-
-        if (!result) {
-            LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() received error from UIProcess");
-            strongClient->didFailLoading(*strongSelf, result.error());
-            return;
-        }
-
-        auto& uuid = *result;
-        String expectedUUID = strongSelf->m_uuid;
-
-        if (uuid != expectedUUID) {
-            LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() UUID mismatch, received %s but expected %s.", uuid.utf8().data(), expectedUUID.utf8().data());
-            strongClient->didFailLoading(*strongSelf, WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, makeString("HydraModelPlayer::createPreviewsForModelWithURL() UUID mismatch, received ", uuid, " but expected ", expectedUUID, ".") });
-            return;
-        }
-
-        LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() successfully established remote connection for UUID %s.", uuid.utf8().data());
-
-        strongSelf->m_rendererCreated = true;
-
-        strongSelf->didCreateOutputForModelWithURL(url);
-    };
-
-    // Then, create the UIProcess preview.
-    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementCreate(m_uuid, m_size), WTFMove(completionHandler));
+//    CompletionHandler<void(Expected<String, WebCore::ResourceError>)> completionHandler = [weakSelf = WeakPtr { *this }, url] (Expected<String, WebCore::ResourceError> result) mutable {
+//        RefPtr strongSelf = weakSelf.get();
+//        if (!strongSelf)
+//            return;
+//
+//        auto strongClient = strongSelf->client();
+//        if (!strongClient)
+//            return;
+//
+//        if (!result) {
+//            LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() received error from UIProcess");
+//            strongClient->didFailLoading(*strongSelf, result.error());
+//            return;
+//        }
+//
+//        auto& uuid = *result;
+//        String expectedUUID = strongSelf->m_uuid;
+//
+//        if (uuid != expectedUUID) {
+//            LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() UUID mismatch, received %s but expected %s.", uuid.utf8().data(), expectedUUID.utf8().data());
+//            strongClient->didFailLoading(*strongSelf, WebCore::ResourceError { WebCore::errorDomainWebKitInternal, 0, { }, makeString("HydraModelPlayer::createPreviewsForModelWithURL() UUID mismatch, received ", uuid, " but expected ", expectedUUID, ".") });
+//            return;
+//        }
+//
+//        LOG(ModelElement, "HydraModelPlayer::createOutputForModelWithURL() successfully established remote connection for UUID %s.", uuid.utf8().data());
+//
+//        strongSelf->m_rendererCreated = true;
+//
+//        strongSelf->didCreateOutputForModelWithURL(url);
+//    };
+//
+//    // Then, create the UIProcess preview.
+//    strongPage->sendWithAsyncReply(Messages::WebPageProxy::HydraModelElementCreate(m_uuid, m_size), WTFMove(completionHandler));
 }
 
 void HydraModelPlayer::didCreateOutputForModelWithURL(const URL& url)
